@@ -1,109 +1,118 @@
-/*
-Basics derived from measuring "smaller pipe for 25 mm tube"
-    (https://www.thingiverse.com/thing:6534684/files)
-Produces a foot in two parts, based on these premises:
+/*                             Version 2: 14 July 2024
+Notes:
+Inspiration: 3D model "smaller pipe for 25 mm tube" (https://www.thingiverse.com/thing:6534684/files)
+Aim: Produce a foot that must print without supports, based on these premises:
+*  Walls will be thick enough to support PVC pipe while organ being moved, eg on a cart over rough ground
 *  PVC pipe will be used for the resonating pipe
 *  The pipe will be stopped, not open
 *  Frequency will be given
-*  Mouth height should be (but is not) based on frequency using this formula
+*  Mouth height calculated using frequency in this formula (stopped pipe)
         MH = [3.018 - 0.233 ln f]^5 (MH = Mouth Height; f = Frequency; ln = natural log)
-        (https://www.rwgiangiulio.com/math/mouthheight.htm)
-        a = 440Hz, stopped MH = 8.1
-     My first shot: multiply flue length by cut up fraction (see calculated definitions)
-*  Cut-up (ratio mouth height to width) preset as cut-up (a guess for now)
 *  Flue (the slot in the languid through which air is blown) needs printing at high resolution for accuracy
-    For now, it's preset as flue_length and flue_width (a proportion of the pipe diameter)
-    Formula using windsheet width (the thickness of the air stream coming from the flue) to get Ising's number at https://www.mmdigest.com/Tech/isingform.html
+    For now, flue_width is calculated from parameter input and flue_depth entered directly
+*  Stem diameter, inside diameter of the stem connecting to the windchest
+*  Foot length - from windchest to mouth to resonator = user's choice
+*  Upper lip offset - achieved by aligning flue on languid
+        [(https://www.colinpykett.org.uk/physics-of-voicing-organ-flue-pipes.htm#Offset)]
+References:
+*  [Formula using windsheet width (the thickness of the air stream coming from the flue) to get Ising's number at https://www.mmdigest.com/Tech/isingform.html
     and https://www.rwgiangiulio.com/math/wst.htm [Beware, Imperial units]
     windsheet_thickness =	(I^2 * f^2 * )ρ * H^3)) / 2P
-        I = Ising's number; p = air density; P = air pressure; H = mouth height 
-*  Stem diameter, outside diameter of the stem entering the windchest
-*  Pipe length is: flue to stopper base - the pipe width + stopper 
+        I = Ising's number; p = air density; P = air pressure; H = mouth height ]
+*  Mouth height: a = 440Hz, stopped MH = 8.1 (https://www.rwgiangiulio.com/math/mouthheight.htm)
+*  [Pipe length is: flue to stopper base - the pipe width + stopper 
         pipe_length = 3386 / f - pipe_internal_diameter (plus a bit of headroom?)
         (https://www.rwgiangiulio.com/math/pipelength.htm)
-        (https://www.ccoors.de/webpipecalc/)
-*  Foot length - from windchest to mouth, user's choice
-*  Ears: On or Off : TO BE DONE
-*  Harmonic Bridge aka Beard: On or Off : TO BE DONE
+        (https://www.ccoors.de/webpipecalc/)]
+*  Upper lip offset: (https://www.colinpykett.org.uk/physics-of-voicing-organ-flue-pipes.htm#Offset)
+TO BE DONE - 
+Harmonic Bridge aka Beard? On or Off 
         (https://www.youtube.com/watch?v=bHBOwiEf6FM and Colin Pykett, below)
-*  Upper lip offset - to be considered
-        (https://www.colinpykett.org.uk/physics-of-voicing-organ-flue-pipes.htm#Offset)
+Stress test - find what breaks
 */
 // Definitions
+// Design parameters - set these first
+// Choose these:
+ears_on = 1; // 1 = make ears, 0 = no ears
+coupler_on = 1; // 1 = make coupler, 0 = no coupler
+// Set these:
+PVC_outside = 31; // outside diameter of PVC pipe resonator
+PVC_inside = 26; // inside diameter of PVC pipe resonator
+frequency = 880; // Hz of target pipe, used to calculate mouth height
+pipe_diameter = 26; // inside diameter of foot - make same as PVC inside
+stem_diameter = 6; // inside diameter of tube to couple with windchest
+stem_length = 10; // length of pipe to couple with windchest
+lower_body_length = 12; // length of lower pipe between stem and languid section
+lower_top_length = 18; // length of lower section with languid that mates with upper
+upper_length = 25; // user choice: length of upper part
+// Review these
+wall_thick = 2; // thickness of walls in this foot
+languid_thick = 1.25; // thickness of the languid (flat plate with air hole)
+flue_offset_factor = 0.5; // adjust this amount of flue depth relative to lip (negative moves towards centre)
+flue_depth = 1.1; // narrow dimension of the flue in the languid
+wind_factor = 0.4; // max proportion of pipe diameter that flue can be
+//wind_factor = 0.5; // max proportion of pipe diameter that flue can be
+ear_thick = 1; // thickness of the ears
+ear_height = 5; // ear protrusion
+upper_ear_length = 0.75; // proportion of upper body the ears will cover - too long can clash with coupler
+collar_thick = 1.2; // thickness of the joining collar
+collar_height = 2.5; // height of joining collar
+coupler_height = 8; // height of PVC coupler
+coupler_thick = 1.2; // thickness of PVC coupler
 // internal parameters quick for preview, smooth curves for render
 $fs = $preview ? 1 : 0.15;
 $fa = $preview ? 3 : 2;
 epsilon = 0.01; // tiny offset to ensure cuts go through
-// Design parameters
-pipe_diameter = 25; // outside diameter of pvc resonator pipe, inside diameter of model
-stem_diameter = 6; // inside diameter of tube to couple with windchest
-stem_length = 10; // length of pipe for air inlet
-body_length = 15; // length of lower pipe between stem and languid section
-frequency = 440; // Hz of target pipe
-wall_thick = 2; // thickness of walls in this foot
-resonator_base_thick = 2; // thickness of base for square resonator connection
-resonator_side_thick = 2; // thickness of walls for resonator connection
-resonator_side_high = 10; // height of walls for resonator connection
-resonator_square = 40; // length & width of base for square resonator connection
-languid_thick = 1.25; // thickness of the languid (flat plate with air hole)
-flue_width = 1.1; // narrow dimension of the flue in the languid
-flue_factor = 0.5; // max proportion of pipe diameter that flue can be
-cut_up = 1 / 3.5; // sets mouth height ratio of tall : wide
-flue_offset = 0.25; // adjust flue location relative to lip
-lip_angle = 12; // angle between the lip and pipe - adjust so no holes around lip
-lower_lip_length = 12; // length of flat forming lip
-upper_lip_length = 12; // length of flat forming lip
-upper_lip_add = wall_thick / 2; // to assure join of lip to tube (guessed amount, not calculated)
-ear_thick = 1; // thickness of the ears
-ear_height = 5; // ear protrusion
-lower_length = 25; // length of taper to inlet tube
-upper_body = 20; // length of inserted pvc resonator pipe
-outlet_block = 8; // distance to hold resonator
-stopper_height = 1.5; // width + height of stopper inside pipe foot
-collar_thick = 1.2; // thickness of the joining collar
-collar_height = 2.5; // height of joining collar
-taper_angle = 15; // angle to form supports (mm cone height)
-collar_diameter = pipe_diameter + wall_thick *2 + collar_thick*2; // diameter of joining collar
-
 // Calculated
-outside_diameter = pipe_diameter + wall_thick * 2; // outside diameter of resonator & lower connections
-flue_length = pipe_diameter * flue_factor; // longer dimension of flue
-upper_length = upper_lip_length + upper_body; // total length of the upper part
-mouth_height =  cut_up*flue_length; // vertical height of mouth
-lip_x = sqrt ((pipe_diameter/2) ^ 2 - (flue_length / 2) ^ 2); // distance from centre of pipe to lip (Pythagoras!)
+collar_diameter = pipe_diameter + wall_thick *2 + collar_thick*2; // diameter of joining collar
+mouth_height = (3.018 - 0.233 * ln (frequency))^5; // (MH = Mouth Height; f = Frequency; ln = natural log)
+echo ("mouth_height = ",mouth_height);
+outside_diameter = pipe_diameter + wall_thick * 2; // outside diameter of foot
+flue_width = pipe_diameter * wind_factor; // longer dimension of flue
+lower_lip_width = pipe_diameter * wind_factor;  // width of flat forming lip
+upper_lip_width = pipe_diameter * wind_factor; // width of flat forming lip
+lip_x = sqrt ((pipe_diameter/2) ^ 2 - (upper_lip_width / 2) ^ 2); // distance from centre of pipe to lip (Pythagoras!)
+lip_x_outer = sqrt ((wall_thick + pipe_diameter/2) ^ 2 - (upper_lip_width / 2) ^ 2); // distance from centre of pipe to outside lip
+lip_top = upper_length - mouth_height; // z height to top of lip
+lip_left = -upper_lip_width/2 - epsilon; // y distance to left side of lip
+lip_width = upper_lip_width/2 + epsilon; // half width of lip
+lip_taper = pipe_diameter - wall_thick*2;
+flue_offset = -flue_depth * flue_offset_factor; // adjust flue location relative to lip (negative moves towards centre)
 /* * * */
 module lower () {
     difference () {
-        //  tube above languid
-        cylinder (d = outside_diameter, h = lower_lip_length + languid_thick);
+        //  tube with languid
+        cylinder (d = outside_diameter, h = lower_top_length + languid_thick);
         translate ([0,0,languid_thick])
-        cylinder (d = pipe_diameter, h = lower_lip_length + languid_thick + epsilon); 
+        cylinder (d = pipe_diameter, h = lower_top_length + languid_thick + epsilon); 
+//        etch_freq (); // etch frequency into languid
+        // cut flue
+        translate ([lip_x + flue_offset + epsilon, -flue_width/2, -epsilon]) // the flue
+        cube ([flue_depth, flue_width, lower_top_length + languid_thick + epsilon*2]);
+        }
+        translate ([lip_x + flue_offset + flue_depth, -flue_width/2 - epsilon, languid_thick]) // filler between flue and wall
+        cube ([lip_x_outer - lip_x + flue_offset - epsilon, flue_width + epsilon *2, lower_top_length+epsilon]); 
+    }
+module lower_body () {
+    difference () {
+    translate ([0, 0, lower_top_length + languid_thick - epsilon])
+    cylinder (h = lower_body_length, d1 = outside_diameter, d2 = stem_diameter + wall_thick * 2);
+    translate ([0, 0, lower_top_length + languid_thick - epsilon*2])
+    cylinder (h = lower_body_length + epsilon * 2, d1 = pipe_diameter, d2 = stem_diameter);
+    }
+}
+module etch_freq () {
         // etch frequency into languid
         translate ([0,pipe_diameter/4,-epsilon])
         linear_extrude (height = languid_thick * 0.5)
         rotate ([180,0,-90]) 
-        text(str(frequency), font="Liberation Sans:style=Bold", size = 5);
-        // cut flue
-        translate ([lip_x + flue_offset, -flue_length/2, -epsilon]) // 
-        cube ([flue_width, flue_length, lower_lip_length + languid_thick + epsilon*2]);
-        }
-    // lower lip inside tube
-    translate ([lip_x + flue_offset + flue_width, -flue_length/2, 0]) 
-    cube ([flue_width, flue_length, lower_lip_length + languid_thick + epsilon*2]);
-}
-module lower_body () {
-    difference () {
-    translate ([0, 0, lower_lip_length + languid_thick - epsilon])
-    cylinder (h = body_length, d1 = outside_diameter, d2 = stem_diameter + wall_thick * 2);
-    translate ([0, 0, lower_lip_length + languid_thick - epsilon*2])
-    cylinder (h = body_length + epsilon * 2, d1 = pipe_diameter, d2 = stem_diameter);
-    }
+        text(str(frequency), font="Liberation Sans:style=Bold", size = 5);    
 }
 module stem () {
     difference () {
-    translate ([0, 0, lower_lip_length + languid_thick + body_length - epsilon])
+    translate ([0, 0, lower_top_length + languid_thick + lower_body_length - epsilon])
     cylinder (h = stem_length + epsilon*2, d = stem_diameter + wall_thick * 2);
-    translate ([0, 0, lower_lip_length + languid_thick + body_length - epsilon*2])
+    translate ([0, 0, lower_top_length + languid_thick + lower_body_length - epsilon*2])
     cylinder (h = stem_length + epsilon*4, d = stem_diameter);
     }
 }
@@ -116,15 +125,29 @@ module upper () {
 }
 module upper_cut () {
 // cut out mouth and lip openings
-    translate ([pipe_diameter/2-wall_thick, -flue_length/2 - epsilon, upper_length - mouth_height - upper_lip_length+epsilon])
-    cube ([wall_thick*2 + collar_thick, flue_length - epsilon*2, upper_lip_length + mouth_height + collar_height + epsilon]);
+    translate ([pipe_diameter/2-wall_thick, -upper_lip_width/2 - epsilon, -epsilon])
+    cube ([wall_thick*2 + collar_thick, upper_lip_width - epsilon*2, upper_length + epsilon*2]);
     }
 module lip_stick () {
-    translate ([lip_x, flue_length/2, upper_length - mouth_height])
-    rotate ([0,90,-90])
-    rotate_extrude (angle = lip_angle)
-    polygon(points = [ [0, 0], [upper_lip_length + upper_lip_add, 0], [upper_lip_length + upper_lip_add, flue_length + epsilon*2], [0, flue_length + epsilon*2] ], paths = [ [0, 1, 2, 3] ], convexity = 10);
+Lip_Points = [
+  [ lip_x,  lip_left,  0 ],  //0
+  [ lip_x_outer,  lip_left,  0 ],  //1
+  [ lip_x_outer,  lip_width,  0 ],  //2
+  [ lip_x,  lip_width,  0 ],  //3
+  [ lip_x,  lip_left,  lip_top ],  //4
+  [ lip_x,  lip_width,  lip_top ] ];  //5
+Lip_Faces = [
+  [0,1,2,3],  // bottom
+  [4,5,2,1],  // front
+  [0,3,5,4],  // inside
+  [2,5,3],  // right
+  [0,4,1] ]; // left
+    difference () {
+    polyhedron( Lip_Points, Lip_Faces );
+        translate ([0,0,-epsilon])
+        cylinder (d1 = pipe_diameter, d2 = lip_taper, h = lip_top); 
     }
+}
 module collar () {
     difference () {
         union () {
@@ -138,62 +161,54 @@ module collar () {
             translate([pipe_diameter/2 + wall_thick - epsilon, -upper_length - collar_height + epsilon, 0]) // inside diameter; z elevation; no effect
             polygon(points = [ [0, 0], [collar_thick, 0], [collar_thick, collar_height], [0, collar_height]], paths = [ [0, 1, 2, 3] ], convexity = 10); // square section
             }
-        translate ([lip_x - epsilon, -flue_length/2 - ear_thick - epsilon, upper_length - collar_thick - epsilon])
-        cube ([wall_thick * 2 + collar_thick * 2 + epsilon * 2,  flue_length + ear_thick * 2 + epsilon * 2, collar_height + collar_thick + epsilon*2]);
+        translate ([lip_x - epsilon, -flue_width/2 - (ear_thick * ears_on) - epsilon, upper_length - collar_thick - epsilon])
+        cube ([wall_thick * 2 + collar_thick * 2 + epsilon * 2,  flue_width + ear_thick * (ears_on * 2 ) + epsilon * 2, collar_height + collar_thick + epsilon*2]);
     }
 }
-module insert_stop () {
-    rotate ([180, 0, 0 ])
-    rotate_extrude(convexity = 10)
-    translate([pipe_diameter/2 + epsilon, -outlet_block, 0]) // inside diameter, z elevation, no effect
-    circle (r = wall_thick-epsilon);
-}
 module lower_ears () {
-    for (n = [-flue_length/2 - ear_thick : flue_length + ear_thick : flue_length/2])
-    translate ([lip_x + flue_width, n, 0])
-    cube ([ear_height, ear_thick, lower_lip_length]);
+    for (n = [-flue_width/2 - ear_thick : flue_width + ear_thick : flue_width/2]) {
+    translate ([lip_x + flue_depth, n, 0])
+    cube ([ear_height, ear_thick, lower_lip_width]);
+    }
 }
 module upper_ears () {
-    for (n = [-flue_length/2 - ear_thick : flue_length + ear_thick : flue_length/2]) {
+    for (n = [-lip_width - ear_thick : lip_width * 2 + ear_thick : lip_width]) {
     difference () {
-        translate ([lip_x + flue_width, n, upper_length - upper_lip_length - upper_lip_add - mouth_height ])
-        cube ([ear_height, ear_thick, upper_lip_length + mouth_height + upper_lip_add]);
-        translate ([lip_x + flue_width, n-epsilon, upper_length - upper_lip_length - upper_lip_add - mouth_height])
+        translate ([lip_x + flue_depth, n, upper_length *(1-upper_ear_length)])
+        cube ([ear_height, ear_thick, upper_length * upper_ear_length]);
+        translate ([lip_x + flue_depth, n-epsilon, upper_length * (1-upper_ear_length)])
         rotate ([0, 45, 0])
-        cube ([ear_height, ear_thick + epsilon * 2, upper_lip_length + upper_lip_add + mouth_height]);
+        cube ([ear_height, ear_thick + epsilon * 2, upper_lip_width]);
         }
     }
 }
-module square_resonator () {
-    difference () {
-    cube ([resonator_square + resonator_side_thick * 2, resonator_square + resonator_side_thick * 2, resonator_base_thick]);
-    translate ([resonator_square + resonator_side_thick - outside_diameter/2, resonator_square / 2 + resonator_side_thick, 
-        -epsilon]) cylinder (d = outside_diameter, h = resonator_base_thick + epsilon * 2);
-    }
-    for (n = [0 : 1]) {
-        translate ([0, n * (resonator_square + resonator_side_thick), 0])
-        cube ([resonator_square + resonator_side_thick * 2, resonator_side_thick, resonator_side_high]);
-        translate ([n * (resonator_square + resonator_side_thick), 0, 0])
-        cube ([resonator_side_thick, resonator_square + resonator_side_thick * 2, resonator_side_high]);
-    }
+module coupler () {
+        difference () {
+        cylinder (h= coupler_height, d = PVC_outside + coupler_thick*2);
+           translate ([0, 0, -epsilon]) 
+            cylinder (h= coupler_height + epsilon * 2, d = outside_diameter);
+           translate ([0, 0, coupler_height/2]) 
+            cylinder (h= coupler_height + epsilon * 2, d = PVC_outside);
+        }
 }
 //  make the model
-
 difference () {
     upper ();
     upper_cut ();
 }
 collar();
-upper_ears ();
-lip_stick ();
-insert_stop ();
-
-translate ([pipe_diameter * 1.25,0,0]) {
+    if (ears_on == 1) upper_ears ();
+    lip_stick ();
+//translate ([0,0,upper_length + 1]) { // position languid over lip for visual check
+translate ([pipe_diameter * 1.5,0,0]) {
     lower();
     lower_body ();
     stem();
-    lower_ears ();
-}
-
-translate ([0, pipe_diameter * 1.25, 0])
-square_resonator ();
+    if (ears_on == 1) lower_ears ();
+        }
+translate ([-pipe_diameter * 1.5,0,0]) 
+    if (outside_diameter > PVC_outside) rotate ([0, 180, 0]) // for printer plate
+        translate ([0, 0, -coupler_height])
+    coupler ();
+    else
+    coupler ();
