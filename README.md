@@ -16,6 +16,7 @@ Aim: Produce a foot that must print without supports, based on these premises:
 *  Foot length - from windchest to mouth to resonator = user's choice
 *  Upper lip offset - achieved by aligning flue on languid
         [(https://www.colinpykett.org.uk/physics-of-voicing-organ-flue-pipes.htm#Offset)]
+
 References:
 *  [Formula using windsheet width (the thickness of the air stream coming from the flue) to get Ising's number at https://www.mmdigest.com/Tech/isingform.html
     and https://www.rwgiangiulio.com/math/wst.htm [Beware, Imperial units]
@@ -27,6 +28,7 @@ References:
         (https://www.rwgiangiulio.com/math/pipelength.htm)
         (https://www.ccoors.de/webpipecalc/)]
 *  Upper lip offset: (https://www.colinpykett.org.uk/physics-of-voicing-organ-flue-pipes.htm#Offset)
+
 TO BE DONE - 
 Harmonic Bridge aka Beard? On or Off 
         (https://www.youtube.com/watch?v=bHBOwiEf6FM and Colin Pykett, below)
