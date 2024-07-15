@@ -74,9 +74,9 @@ upper_lip_width = pipe_diameter * wind_factor; // width of flat forming lip
 lip_x = sqrt ((pipe_diameter/2) ^ 2 - (upper_lip_width / 2) ^ 2); // distance from centre of pipe to lip (Pythagoras!)
 lip_x_outer = sqrt ((wall_thick + pipe_diameter/2) ^ 2 - (upper_lip_width / 2) ^ 2); // distance from centre of pipe to outside lip
 lip_top = upper_length - mouth_height; // z height to top of lip
-lip_left = -upper_lip_width/2 - epsilon; // y distance to left side of lip
-lip_width = upper_lip_width/2 + epsilon; // half width of lip
-lip_taper = pipe_diameter - wall_thick*2;
+lip_left = -upper_lip_width/2 - epsilon*2; // y distance to left side of lip
+lip_width = upper_lip_width/2 + epsilon*2; // half width of lip
+lip_shaper = pipe_diameter - wall_thick*2;
 flue_offset = -flue_depth * flue_offset_factor; // adjust flue location relative to lip (negative moves towards centre)
 /* * * */
 module lower () {
@@ -145,7 +145,7 @@ Lip_Faces = [
     difference () {
     polyhedron( Lip_Points, Lip_Faces );
         translate ([0,0,-epsilon])
-        cylinder (d1 = pipe_diameter, d2 = lip_taper, h = lip_top); 
+        cylinder (d1 = pipe_diameter, d2 = lip_shaper, h = lip_top); 
     }
 }
 module collar () {
