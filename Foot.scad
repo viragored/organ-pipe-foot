@@ -33,6 +33,7 @@ Stress test - find what breaks
 // Definitions
 // Design parameters - set these first
 // Choose these:
+make = "s"; // f makes a foot, s makes a stopper
 ears_on = 1; // 1 = make ears, 0 = no ears
 coupler_on = 1; // 1 = make coupler, 0 = no coupler
 // Set these:
@@ -45,6 +46,18 @@ stem_length = 10; // length of pipe to couple with windchest
 lower_body_length = 12; // length of lower pipe between stem and languid section
 lower_top_length = 18; // length of lower section with languid that mates with upper
 upper_length = 25; // user choice: length of upper part
+// for stopper
+disc_thick = 6; // thickness of stopper
+knob_height = 25;
+knob_diameter = 15;
+knob_stand = 8; // height of knob base
+knob_stretch = 2; // factor to multiply knob_height
+screw_thread = 4; // diameter of fastening screw
+screw_head = 8; // diameter of screw head
+screw_free = 5; // length of thread to keep unused within knob (adjust to save cutting screws)
+nut_diameter = 7.5; // full diameter of hex nut
+nut_thick = 3.3; // thickness of nut
+o_ring_thick = 2; // thickness of o_ring
 // Review these
 wall_thick = 2; // thickness of walls in this foot
 languid_thick = 1.25; // thickness of the languid (flat plate with air hole)
@@ -59,15 +72,16 @@ collar_thick = 1.2; // thickness of the joining collar
 collar_height = 2.5; // height of joining collar
 coupler_height = 8; // height of PVC coupler
 coupler_thick = 1.2; // thickness of PVC coupler
+printer_fit = 0.2; // amount to allow for printer fitting curved parts
 // internal parameters quick for preview, smooth curves for render
 $fs = $preview ? 1 : 0.15;
 $fa = $preview ? 3 : 2;
 epsilon = 0.01; // tiny offset to ensure cuts go through
 // Calculated
-collar_diameter = pipe_diameter + wall_thick *2 + collar_thick*2; // diameter of joining collar
 mouth_height = (3.018 - 0.233 * ln (frequency))^5; // (MH = Mouth Height; f = Frequency; ln = natural log)
 echo ("mouth_height = ",mouth_height);
 outside_diameter = pipe_diameter + wall_thick * 2; // outside diameter of foot
+collar_diameter = outside_diameter + collar_thick*2 + printer_fit; // outside diameter of joining collar
 flue_width = pipe_diameter * wind_factor; // longer dimension of flue
 lower_lip_width = pipe_diameter * wind_factor;  // width of flat forming lip
 upper_lip_width = pipe_diameter * wind_factor; // width of flat forming lip
@@ -78,6 +92,12 @@ lip_left = -upper_lip_width/2 - epsilon*2; // y distance to left side of lip
 lip_width = upper_lip_width/2 + epsilon*2; // half width of lip
 lip_shaper = pipe_diameter - wall_thick*2;
 flue_offset = -flue_depth * flue_offset_factor; // adjust flue location relative to lip (negative moves towards centre)
+disc_height = wall_thick * 3;
+knob_radius = knob_diameter/2;
+knob_top = knob_diameter * knob_stretch;
+knob_z = knob_radius * knob_stretch; // base of stretched knob
+o_ring_factor = 0.3; // proportion of o_ring between disc and PVC
+disc_diameter = pipe_diameter - o_ring_thick * o_ring_factor * 2; // also adjust by printer_fit
 /* * * */
 module lower () {
     difference () {
@@ -153,12 +173,11 @@ module collar () {
         union () {
             rotate ([180, 0, 0 ])
             rotate_extrude (convexity = 10)
-            translate([pipe_diameter/2 + wall_thick - epsilon, - upper_length, 0]) // inside diameter, z elevation, no effect
+            translate([pipe_diameter/2 + wall_thick + printer_fit - epsilon, - upper_length, 0]) // inside radius, z elevation, no effect
             polygon(points = [ [0, 0], [0, collar_thick], [collar_thick, 0]], paths = [ [0, 1, 2] ], convexity = 10); // triangular section
-    
             rotate ([180, 0, 0 ])
             rotate_extrude(convexity = 10)
-            translate([pipe_diameter/2 + wall_thick - epsilon, -upper_length - collar_height + epsilon, 0]) // inside diameter; z elevation; no effect
+            translate([pipe_diameter/2 + wall_thick + printer_fit - epsilon, -upper_length - collar_height + epsilon, 0]) // inside radius; z elevation; no effect
             polygon(points = [ [0, 0], [collar_thick, 0], [collar_thick, collar_height], [0, collar_height]], paths = [ [0, 1, 2, 3] ], convexity = 10); // square section
             }
         translate ([lip_x - epsilon, -flue_width/2 - (ear_thick * ears_on) - epsilon, upper_length - collar_thick - epsilon])
@@ -191,7 +210,34 @@ module coupler () {
             cylinder (h= coupler_height + epsilon * 2, d = PVC_outside);
         }
 }
+module knob () {
+    difference () {
+        union () {
+            cylinder (d = knob_radius, h = knob_stand); // stand
+            translate ([0, 0, knob_z]) // knob
+            resize ([0, 0, knob_top])
+            sphere (d = knob_diameter);
+            }
+        translate ([0, 0, -epsilon])
+        cylinder (d = screw_thread, h = knob_top + epsilon * 2);
+        translate ([0, 0, screw_free])
+        cylinder (d = screw_head, h = knob_top + epsilon * 2);
+    }
+}
+module disc () {
+    difference () {
+        cylinder (d = disc_diameter, h = disc_thick);
+        translate ([0, 0, -epsilon])
+        cylinder (d = screw_thread, h = disc_thick + epsilon * 2);
+        rotate_extrude(convexity = 10) // cut O-ring channel
+        translate ([disc_diameter/2, disc_thick/2,0])
+        circle (d = o_ring_thick);
+        translate([0, 0, -epsilon]) // cut nut recess
+        cylinder (d = nut_diameter, h = nut_thick, $fn = 6); // hex hole for nut
+    }    
+}
 //  make the model
+if (make == "f") { // make a foot
 difference () {
     upper ();
     upper_cut ();
@@ -212,3 +258,9 @@ translate ([-pipe_diameter * 1.5,0,0])
     coupler ();
     else
     coupler ();
+}
+if (make == "s") { // make a stopper
+knob();
+translate ([disc_diameter, 0, 0])
+    disc();
+}
