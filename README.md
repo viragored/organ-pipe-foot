@@ -1,8 +1,6 @@
 # organ-pipe-foot
 OpenSCAD code to create organ pipe feet, customisable for size and shape
 
-This is the start of a project with many changes to come
-
 Aim: Produce a foot that must print without supports, based on these premises:
 *  Walls will be thick enough to support PVC pipe while organ being moved, eg on a cart over rough ground
 *  PVC pipe will be used for the resonating pipe
@@ -11,7 +9,7 @@ Aim: Produce a foot that must print without supports, based on these premises:
 *  Mouth height calculated using frequency in this formula (stopped pipe)
         MH = [3.018 - 0.233 ln f]^5 (MH = Mouth Height; f = Frequency; ln = natural log)
 *  Flue (the slot in the languid through which air is blown) needs printing at high resolution for accuracy
-    For now, flue_width is calculated from parameter input and flue_depth entered directly
+    flue_width is calculated from the Ising formula (link below)
 *  Stem diameter, inside diameter of the stem connecting to the windchest
 *  Foot length - from windchest to mouth to resonator = user's choice
 *  Upper lip offset - achieved by aligning flue on languid
@@ -28,9 +26,4 @@ References:
         (https://www.rwgiangiulio.com/math/pipelength.htm)
         (https://www.ccoors.de/webpipecalc/)]
 *  Upper lip offset: (https://www.colinpykett.org.uk/physics-of-voicing-organ-flue-pipes.htm#Offset)
-
-TO BE DONE - 
-Harmonic Bridge aka Beard? On or Off 
-        (https://www.youtube.com/watch?v=bHBOwiEf6FM and Colin Pykett, below)
-Stress test - find what breaks
 
