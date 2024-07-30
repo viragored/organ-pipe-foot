@@ -9,7 +9,7 @@ Aim: Produce a foot that must print without supports, based on these premises:
 *  Mouth height calculated using frequency in this formula (stopped pipe)
         MH = [3.018 - 0.233 ln f]^5 (MH = Mouth Height; f = Frequency; ln = natural log)
 *  Flue (the slot in the languid through which air is blown) needs printing at high resolution for accuracy
-    flue_width is calculated from the Ising formula (link below)
+*  flue_width is calculated from the Ising formula (link below)
 *  Stem diameter, inside diameter of the stem connecting to the windchest
 *  Foot length - from windchest to mouth to resonator = user's choice
 *  Upper lip offset - achieved by aligning flue on languid
