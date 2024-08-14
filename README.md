@@ -18,7 +18,7 @@ Aim: Produce a foot that must print without supports, based on these premises:
 References:
 *  [Formula using windsheet width (the thickness of the air stream coming from the flue) to get Ising's number at https://www.mmdigest.com/Tech/isingform.html
     and https://www.rwgiangiulio.com/math/wst.htm [Beware, Imperial units]
-    windsheet_thickness =	(I^2 * f^2 * )ρ * H^3)) / 2P
+    windsheet_thickness =	(I^2 * f^2 * ρ * H^3) / 2P
         I = Ising's number; p = air density; P = air pressure; H = mouth height ]
 *  Mouth height: a = 440Hz, stopped MH = 8.1 (https://www.rwgiangiulio.com/math/mouthheight.htm)
 *  [Pipe length is: flue to stopper base - the pipe width + stopper 
